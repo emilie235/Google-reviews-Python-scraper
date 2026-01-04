@@ -20,12 +20,6 @@ class RawReview:
     date: str = ""
     lang: str = "und"
     text: str = ""
-    likes: int = 0
-    photos: list[str] = field(default_factory=list)
-    profile: str = ""
-    avatar: str = ""  # URL to profile picture
-    owner_date: str = ""
-    owner_text: str = ""
     review_date: str = ""  # ISO format date
     
     # Translation fields
@@ -49,8 +43,6 @@ class RawReview:
 
         rid = card.get_attribute("data-review-id") or ""
         author = first_text(card, 'div[class*="d4r55"]')
-        profile = first_attr(card, 'button[data-review-id]', "data-href")
-        avatar = first_attr(card, 'button[data-review-id] img', "src")
 
         label = first_attr(card, 'span[role="img"]', "aria-label")
         num = re.search(r"[\d\.]+", label.replace(",", ".")) if label else None
@@ -68,20 +60,4 @@ class RawReview:
             if text: break
         lang = detect_lang(text)
 
-        likes = 0
-        if (btn := try_find(card, cls.LIKE_BTN)):
-            likes = safe_int(btn[0].text or btn[0].get_attribute("aria-label"))
-
-        photos: list[str] = []
-        for btn in try_find(card, cls.PHOTO_BTN, all=True):
-            if (m := re.search(r'url\("([^"]+)"', btn.get_attribute("style") or "")):
-                photos.append(m.group(1))
-
-        owner_date = owner_text = ""
-        if (box := try_find(card, cls.OWNER_RESP)):
-            box = box[0]
-            owner_date = first_text(box, "span.DZSIDd")
-            owner_text = first_text(box, "div.wiI7pd")
-
-        return cls(rid, author, rating, date, lang, text, likes,
-                   photos, profile, avatar, owner_date, owner_text, review_date)
+        return cls(rid, author, rating, date, lang, text, review_date)

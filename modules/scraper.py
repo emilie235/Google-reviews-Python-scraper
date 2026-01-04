@@ -292,7 +292,8 @@ class GoogleReviewsScraper:
         try:
             # Strategy 1: Data attribute detection (most reliable across languages)
             tab_index = tab.get_attribute("data-tab-index")
-            if tab_index == "1" or tab_index == "reviews":
+            #if tab_index == "1" or tab_index == "reviews":
+            if tab_index == "avis" :
                 return True
 
             # Strategy 2: Role and aria attributes (accessibility detection)
@@ -365,6 +366,8 @@ class GoogleReviewsScraper:
         # Define different selectors to try in order of reliability
         tab_selectors = [
             # Direct tab selectors
+            '[data-tab-index="3"]',
+            '[data-tab-index="2"]', # Ajout par Emilien
             '[data-tab-index="1"]',  # Most common tab index
             '[role="tab"][data-tab-index]',  # Any tab with index
             'button[role="tab"]',  # Button tabs
@@ -1127,7 +1130,8 @@ class GoogleReviewsScraper:
             wait = WebDriverWait(driver, 20)  # Reduced from 40 to 20 for faster timeout
 
             driver.get(url)
-            wait.until(lambda d: "google.com/maps" in d.current_url)
+            wait.until(lambda d: "google.com/maps" in d.current_url
+                       or "google.fr/maps" in d.current_url)
 
             self.dismiss_cookies(driver)
             self.click_reviews_tab(driver)
@@ -1364,6 +1368,33 @@ class GoogleReviewsScraper:
             return False
 
         finally:
+            # Attempt to save partial results on interruption or error so
+            # user doesn't lose already scraped reviews.
+            try:
+                if 'docs' in locals() and docs:
+                    # Save to MongoDB if enabled
+                    if self.use_mongodb and self.mongodb:
+                        try:
+                            log.info("Saving partial reviews to MongoDB (on interrupt/error)...")
+                            self.mongodb.save_reviews(docs)
+                        except Exception as e:
+                            log.warning(f"Failed to save partial reviews to MongoDB: {e}")
+
+                    # Backup to JSON if enabled
+                    if self.backup_to_json and hasattr(self, 'json_storage') and self.json_storage:
+                        try:
+                            log.info("Backing up partial reviews to JSON (on interrupt/error)...")
+                            self.json_storage.save_json_docs(docs)
+                            if 'seen' in locals():
+                                try:
+                                    self.json_storage.save_seen(seen)
+                                except Exception as e:
+                                    log.warning(f"Failed to save seen IDs to JSON: {e}")
+                        except Exception as e:
+                            log.warning(f"Failed to backup partial reviews to JSON: {e}")
+            except Exception as e:
+                log.debug(f"Error while attempting partial save: {e}")
+
             if driver is not None:
                 try:
                     driver.quit()

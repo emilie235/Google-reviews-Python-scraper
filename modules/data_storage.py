@@ -256,11 +256,6 @@ def merge_review(existing: Dict[str, Any] | None, raw: RawReview) -> Dict[str, A
             "author": raw.author,
             "rating": raw.rating,
             "description": {},  # renamed from "texts"
-            "likes": raw.likes,
-            "user_images": list(raw.photos),  # renamed from "photo_urls"
-            "author_profile_url": raw.profile,  # renamed from "profile_link"
-            "profile_picture": raw.avatar,  # renamed from "avatar_url"
-            "owner_responses": {},
             "created_date": get_current_iso_date(),
             "review_date": parse_relative_date(raw.date, RAW_LANG),
         }
@@ -268,15 +263,6 @@ def merge_review(existing: Dict[str, Any] | None, raw: RawReview) -> Dict[str, A
         # Handle existing reviews with old field names - migrate them
         if "texts" in existing and "description" not in existing:
             existing["description"] = existing.pop("texts")
-
-        if "photo_urls" in existing and "user_images" not in existing:
-            existing["user_images"] = existing.pop("photo_urls")
-
-        if "profile_link" in existing and "author_profile_url" not in existing:
-            existing["author_profile_url"] = existing.pop("profile_link")
-
-        if "avatar_url" in existing and "profile_picture" not in existing:
-            existing["profile_picture"] = existing.pop("avatar_url")
 
         # Add ISO dates if not present
         if "created_date" not in existing:
@@ -294,24 +280,6 @@ def merge_review(existing: Dict[str, Any] | None, raw: RawReview) -> Dict[str, A
 
     if not existing.get("rating"):
         existing["rating"] = raw.rating
-
-    if raw.likes > existing.get("likes", 0):
-        existing["likes"] = raw.likes
-
-    # Update the images list
-    existing["user_images"] = list({*existing.get("user_images", []), *raw.photos})
-
-    # Update avatar/profile picture
-    if raw.avatar and (
-            not existing.get("profile_picture") or len(raw.avatar) > len(existing.get("profile_picture", ""))):
-        existing["profile_picture"] = raw.avatar
-
-    if raw.owner_text:
-        lang = detect_lang(raw.owner_text)
-        # Don't store the date string in owner_responses
-        existing.setdefault("owner_responses", {})[lang] = {
-            "text": raw.owner_text,
-        }
 
     # Update last_modified timestamp
     existing["last_modified_date"] = get_current_iso_date()

@@ -66,7 +66,13 @@ def main():
 
     # Initialize and run scraper
     scraper = GoogleReviewsScraper(config)
-    scraper.scrape()
+    result = scraper.scrape()
+    # If scraping failed, exit with non-zero code so callers (like collect.py)
+    # detect failures when using subprocess.run(check=True)
+    if result is False:
+        import sys
+        log.error("Scraper reported failure; exiting with code 1")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
