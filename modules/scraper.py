@@ -195,8 +195,13 @@ class GoogleReviewsScraper:
                     driver = Driver(
                         uc=True,
                         headless=headless,
-                        binary_location=chrome_binary,
-                        page_load_strategy="normal"
+                        page_load_strategy="normal",
+                        incognito=True,
+                        locale="en-US",
+                        chromium_args=[
+                        "--lang=en-US",
+                        "--disable-blink-features=AutomationControlled"
+                        ]
                     )
                     log.info("Successfully created SeleniumBase UC driver with custom binary")
                 except Exception as e:
@@ -293,7 +298,7 @@ class GoogleReviewsScraper:
             # Strategy 1: Data attribute detection (most reliable across languages)
             tab_index = tab.get_attribute("data-tab-index")
             #if tab_index == "1" or tab_index == "reviews":
-            if tab_index == "avis" :
+            if tab_index == "reviews" :
                 return True
 
             # Strategy 2: Role and aria attributes (accessibility detection)
@@ -1125,11 +1130,25 @@ class GoogleReviewsScraper:
             seen = self.json_storage.load_seen()
 
         driver = None
+
+        driver.execute_cdp_cmd(
+            "Network.setExtraHTTPHeaders",
+            {
+                "headers": {
+                    "Accept-Language": "en-US,en;q=0.9"
+                }
+            }
+        )
+        
         try:
             driver = self.setup_driver(headless)
             wait = WebDriverWait(driver, 20)  # Reduced from 40 to 20 for faster timeout
+            if "hl=" not in url:
+            sep = "&" if "?" in url else "?"
+            url = f"{url}{sep}hl=en"
 
             driver.get(url)
+            log.info("LANG CHECK → %s", driver.execute_script("return document.documentElement.lang"))
             wait.until(lambda d: "google.com/maps" in d.current_url
                        or "google.fr/maps" in d.current_url)
 
