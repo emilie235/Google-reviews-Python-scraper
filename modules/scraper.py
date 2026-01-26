@@ -1129,23 +1129,21 @@ class GoogleReviewsScraper:
             # Load seen IDs from file
             seen = self.json_storage.load_seen()
 
-        driver = None
-
-        driver.execute_cdp_cmd(
-            "Network.setExtraHTTPHeaders",
-            {
-                "headers": {
-                    "Accept-Language": "en-US,en;q=0.9"
-                }
-            }
-        )
-        
         try:
             driver = self.setup_driver(headless)
+            
+            driver.execute_cdp_cmd(
+                "Network.setExtraHTTPHeaders",
+                {
+                    "headers": {
+                        "Accept-Language": "en-US,en;q=0.9"
+                    }
+                }
+            )
             wait = WebDriverWait(driver, 20)  # Reduced from 40 to 20 for faster timeout
-            if "hl=" not in url:
-            sep = "&" if "?" in url else "?"
-            url = f"{url}{sep}hl=en"
+            #if "hl=" not in url:
+            #     sep := "&" if "?" in url else sep:="?"
+           # url = f"{url}{sep}hl=en"
 
             driver.get(url)
             log.info("LANG CHECK → %s", driver.execute_script("return document.documentElement.lang"))

@@ -6,9 +6,14 @@ Google‑Maps review scraper with MongoDB integration
 Main entry point for the scraper.
 """
 
+import logging
 from modules.cli import parse_arguments
 from modules.config import load_config
 from modules.scraper import GoogleReviewsScraper
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("start")
 
 
 def main():
@@ -56,13 +61,6 @@ def main():
         config["custom_url_reviews"] = args.custom_url_reviews
     if args.preserve_original_urls is not None:
         config["preserve_original_urls"] = args.preserve_original_urls
-
-    # Handle custom parameters
-    if args.custom_params is not None:
-        if "custom_params" not in config:
-            config["custom_params"] = {}
-        # Update config with the provided custom parameters
-        config["custom_params"].update(args.custom_params)
 
     # Initialize and run scraper
     scraper = GoogleReviewsScraper(config)

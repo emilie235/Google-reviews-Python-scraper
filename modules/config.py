@@ -43,11 +43,8 @@ DEFAULT_CONFIG = {
     "custom_url_profiles": "/profiles/",  # Path for profile images
     "custom_url_reviews": "/reviews/",  # Path for review images
     "preserve_original_urls": True,  # Option to preserve original URLs
-    "custom_params": {  # Custom parameters to add to each document
-        "company": "Thaitours",  # Default example
-        "source": "Google Maps"  # Default example
+    "restaurant": None
     }
-}
 
 
 def load_config(config_path: Path = DEFAULT_CONFIG_PATH) -> Dict[str, Any]:

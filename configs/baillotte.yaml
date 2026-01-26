@@ -1,9 +1,6 @@
 backup_to_json: true
 convert_dates: true
-custom_params:
-  company: Simone
-  source: Google Maps
-  restaurant: Baillotte
+restaurant: Baillotte
 custom_url_base: https://mycustomurl.com
 custom_url_profiles: /profiles/
 custom_url_reviews: /reviews/
@@ -12,6 +9,7 @@ download_threads: 4
 headless: false
 image_dir: review_images
 json_path: C:\Users\leemi\OneDrive\Documents\ENSAE\RA\Google reviews scraping\google-reviews-scraper-pro\data\baillotte\baillotte.json
+seen_ids_path: C:\Users\leemi\OneDrive\Documents\ENSAE\RA\Google reviews scraping\google-reviews-scraper-pro\data\baillotte\baillotte.ids
 mongodb:
   collection: google_reviews
   database: reviews
@@ -19,9 +17,8 @@ mongodb:
 overwrite_existing: false
 preserve_original_urls: true
 replace_urls: false
-seen_ids_path: C:\Users\leemi\OneDrive\Documents\ENSAE\RA\Google reviews scraping\google-reviews-scraper-pro\data\baillotte\baillotte.ids
 sort_by: relevance
 stop_on_match: false
 store_local_paths: true
-url: https://www.google.com/maps/place/?q=place_id:ChIJkx6OB6dx5kcRmoa3OG1oEls
+url: https://www.google.com/maps/place/?q=place_id:ChIJkx6OB6dx5kcRmoa3OG1oEls&hl=en&gl=US
 use_mongodb: false
