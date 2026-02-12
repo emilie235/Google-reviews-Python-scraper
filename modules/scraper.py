@@ -30,6 +30,7 @@ log = logging.getLogger("scraper")
 
 # CSS Selectors
 PANE_SEL = 'div[role="main"] div.m6QErb.DxyBCb.kA9KIf.dS8AEf'
+#PANE_SEL = 'div[role="region"][aria-label*="Avis"], div[role="region"][aria-label*="Reviews"]'
 CARD_SEL = "div[data-review-id]"
 COOKIE_BTN = ('button[aria-label*="Accept" i],'
               'button[jsname="hZCF7e"],'
@@ -1150,6 +1151,10 @@ class GoogleReviewsScraper:
             wait.until(lambda d: "google.com/maps" in d.current_url
                        or "google.fr/maps" in d.current_url)
 
+            driver.refresh()
+            print("refresh page")
+            time.sleep(2)
+
             self.dismiss_cookies(driver)
             self.click_reviews_tab(driver)
 
@@ -1191,7 +1196,9 @@ class GoogleReviewsScraper:
             for selector in pane_selectors:
                 try:
                     log.info(f"Trying to find reviews pane with selector: {selector}")
-                    pane = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
+                    #pane = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
+                    pane = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, PANE_SEL)))
+                    driver.execute_script("arguments[0].scrollTop = 0;", pane)
                     if pane:
                         log.info(f"Found reviews pane with selector: {selector}")
                         break

@@ -34,6 +34,15 @@ def make_slug(text):
     # Supprime les _ en début et fin
     return text.strip("_")
 
+# Detecting already scraped restaurants
+
+def is_scraped_restaurant(resto_dir: Path, slug: str) -> bool:
+    return (
+        (resto_dir / f"{slug}.json").exists()
+        or (resto_dir / f"{slug}.ids").exists()
+    )
+
+
 # Iterating over dataframe rows and generating config files
 
 failed_restaurants = []
@@ -45,6 +54,12 @@ for _, row in df.iterrows():
 
     # create a folder for each restaurant's data
     resto_dir = DATA_DIR / slug
+
+    # make sure the restaurant hasn't already been scraped (check for existing JSON or IDs files)
+    if is_scraped_restaurant(resto_dir, slug):
+        print(f"Skipping {restaurant} (already scraped)")
+        continue
+
     resto_dir.mkdir(parents=True, exist_ok=True)
 
     # loading yaml file template
@@ -53,7 +68,7 @@ for _, row in df.iterrows():
 
     # modifying config values 
 
-    config["custom_params"]["restaurant"] = restaurant
+    config["restaurant"] = restaurant
     config["url"] = (
     f"https://www.google.com/maps/place/?q=place_id:{id}&hl=en&gl=US")
     config["json_path"] = str(resto_dir / f"{slug}.json")
@@ -81,3 +96,5 @@ for _, row in df.iterrows():
         print(f"stdout: {e.stdout}")
         print(f"stderr: {e.stderr}")
         failed_restaurants.append(restaurant)
+
+print("\n\nFailed restaurants:",failed_restaurants)
